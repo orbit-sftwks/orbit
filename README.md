@@ -1,6 +1,22 @@
+# ABOUT
+
+Orbit Hub is a proprietary Roblox Lua script distributed for use in its original, unmodified form.  
+This project is not open source and is published solely for controlled distribution.
+
+---
+
+# CREDIT
+
+- Project Developer: iy_orbit (discord)
+- Project Name: Orbit Hub  
+
+All development, design, and implementation credit belongs to the original author unless explicitly stated otherwise.
+
+---
+
 # LICENSE
 
-Copyright (c) 2026 James Maven  
+Copyright (c) 2026
 All Rights Reserved.
 
 This software and all associated source code (the “Software”) is proprietary.  
@@ -51,22 +67,6 @@ The Software is provided “AS IS”, without warranty of any kind.
 
 By downloading, using, or executing the Software, you agree to be bound  
 by the terms of this license.
-
----
-
-# ABOUT
-
-Orbit Hub is a proprietary Roblox Lua script distributed for use in its original, unmodified form.  
-This project is not open source and is published solely for controlled distribution.
-
----
-
-# CREDIT
-
-- Original Author: James Maven  
-- Project Name: Orbit Hub  
-
-All development, design, and implementation credit belongs to the original author unless explicitly stated otherwise.
 
 ---
 
