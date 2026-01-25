@@ -1,155 +1,133 @@
---[[
-    ORBIT CONFIG LIBRARY
-    Global config saving/loading system
-    
-    Usage:
-        local configlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/orbit-sftwks/orbit/refs/heads/main/libraries/config"))()
-        
-        -- Save config
-        configlib.save("my_config_name", {
-            setting1 = true,
-            setting2 = 50,
-            setting3 = "value"
-        })
-        
-        -- Load config
-        local loaded = configlib.load("my_config_name")
-        if loaded then
-            config.setting1 = loaded.setting1
-        end
-]]
+-- ORBIT CONFIG LIBRARY (SMART PIPELINE VERSION)
 
 local configlib = {}
 
-local httpService = game:GetService("HttpService")
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 local gameId = tostring(game.GameId)
 
-local function getConfigFolder()
-    local folder = "orbit_hub_files"
-    
-    if not isfolder(folder) then
-        makefolder(folder)
+-- executor capability check
+local function executor_supported()
+    local required = {
+        writefile,
+        readfile,
+        isfile,
+        isfolder,
+        makefolder,
+        delfile,
+        listfiles
+    }
+
+    for _, fn in ipairs(required) do
+        if type(fn) ~= "function" then
+            return false
+        end
     end
-    
-    local gameFolder = folder .. "/" .. gameId
+
+    return true
+end
+
+-- block hard if unsupported
+if not executor_supported() then
+    LocalPlayer:Kick("Orbit: Executor does not support filesystem API.")
+    return
+end
+
+local function getConfigFolder()
+    local root = "orbit_hub_files"
+    if not isfolder(root) then
+        makefolder(root)
+    end
+
+    local gameFolder = root .. "/" .. gameId
     if not isfolder(gameFolder) then
         makefolder(gameFolder)
     end
-    
+
     return gameFolder
 end
 
-local function getConfigPath(configName)
-    return getConfigFolder() .. "/" .. configName .. ".json"
+local function getConfigPath(name)
+    return getConfigFolder() .. "/" .. name .. ".json"
 end
 
-function configlib.save(configName, configData)
-    if not configName or not configData then
-        warn("[Config] Invalid parameters for save")
+-- waits for filesystem to be fully usable (important for some executors)
+function configlib.wait_for_pipeline(timeout)
+    timeout = timeout or 5
+    local start = os.clock()
+
+    while os.clock() - start < timeout do
+        local ok = pcall(function()
+            local path = getConfigPath("__test")
+            writefile(path, "{}")
+            delfile(path)
+        end)
+
+        if ok then
+            return true
+        end
+
+        task.wait(0.1)
+    end
+
+    return false
+end
+
+function configlib.save(name, data)
+    if not name or type(data) ~= "table" then
+        warn("[Config] Invalid save request")
         return false
     end
-    
-    local success, result = pcall(function()
-        local json = httpService:JSONEncode(configData)
-        local path = getConfigPath(configName)
-        writefile(path, json)
-        return true
+
+    local ok, err = pcall(function()
+        writefile(getConfigPath(name), HttpService:JSONEncode(data))
     end)
-    
-    if success then
-        print("[Config] Saved: " .. configName)
-        return true
-    else
-        warn("[Config] Failed to save: " .. tostring(result))
+
+    if not ok then
+        warn("[Config] Save failed:", err)
         return false
     end
+
+    return true
 end
 
-function configlib.load(configName)
-    if not configName then
-        warn("[Config] Invalid config name")
-        return nil
-    end
-    
-    local path = getConfigPath(configName)
-    
+function configlib.load(name)
+    if not name then return nil end
+
+    local path = getConfigPath(name)
     if not isfile(path) then
-        warn("[Config] Config not found: " .. configName)
         return nil
     end
-    
-    local success, result = pcall(function()
-        local json = readfile(path)
-        return httpService:JSONDecode(json)
+
+    local ok, result = pcall(function()
+        return HttpService:JSONDecode(readfile(path))
     end)
-    
-    if success then
-        print("[Config] Loaded: " .. configName)
+
+    if ok then
         return result
-    else
-        warn("[Config] Failed to load: " .. tostring(result))
-        return nil
     end
+
+    warn("[Config] Load failed:", result)
+    return nil
 end
 
-function configlib.delete(configName)
-    if not configName then
-        warn("[Config] Invalid config name")
-        return false
-    end
-    
-    local path = getConfigPath(configName)
-    
-    if not isfile(path) then
-        warn("[Config] Config not found: " .. configName)
-        return false
-    end
-    
-    local success, result = pcall(function()
-        delfile(path)
-        return true
-    end)
-    
-    if success then
-        print("[Config] Deleted: " .. configName)
-        return true
-    else
-        warn("[Config] Failed to delete: " .. tostring(result))
-        return false
-    end
+function configlib.exists(name)
+    return name and isfile(getConfigPath(name)) or false
 end
 
 function configlib.list()
     local folder = getConfigFolder()
-    local configs = {}
-    
-    if not isfolder(folder) then
-        return configs
-    end
-    
-    local success, files = pcall(function()
-        return listfiles(folder)
-    end)
-    
-    if success then
-        for _, file in pairs(files) do
-            local name = file:match("([^/]+)%.json$")
-            if name then
-                table.insert(configs, name)
-            end
+    local out = {}
+
+    for _, file in ipairs(listfiles(folder)) do
+        local name = file:match("([^/]+)%.json$")
+        if name then
+            table.insert(out, name)
         end
     end
-    
-    return configs
-end
 
-function configlib.exists(configName)
-    if not configName then
-        return false
-    end
-    
-    local path = getConfigPath(configName)
-    return isfile(path)
+    return out
 end
 
 return configlib
