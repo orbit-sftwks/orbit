@@ -12,7 +12,7 @@ if queue_on_teleport then
 
         if not _G.ORBIT_SESSION.injected then
             _G.ORBIT_SESSION.injected = true
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/orbit-sftwks/orbit/refs/heads/main/games/rivals/main.lua"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/orbit-sftwks/orbit/refs/heads/main/games/rivals/loader.lua"))()
         else
             if _G.ORBIT_ON_TELEPORT then
                 pcall(_G.ORBIT_ON_TELEPORT)
@@ -81,11 +81,21 @@ end
 
 print("[*] Loading main script...")
 local main_url = "https://raw.githubusercontent.com/orbit-sftwks/orbit/refs/heads/main/games/rivals/main.lua"
-local main_script = game:HttpGet(main_url)
+local main_success, main_script = pcall(function()
+    return game:HttpGet(main_url)
+end)
+
+if not main_success then
+    print("[✗] Failed to download main script: " .. tostring(main_script))
+    game:GetService("Players").LocalPlayer:Kick("Orbit: Failed to download main script")
+    return
+end
+
+print("[✓] Main script downloaded")
 
 
-if not acb.finished(main_script) then
-    print("[✗] ACB completion failed or insufficient bypasses")
+if not acb.finished() then
+    print("[✗] ACB completion check failed")
     
     if not acb.is_safe() then
         game:GetService("Players").LocalPlayer:Kick("Orbit: Anti-cheat bypass failed - unsafe to proceed")
@@ -93,8 +103,21 @@ if not acb.finished(main_script) then
     end
     
     print("[!] Proceeding with partial bypass - use at your own risk")
-    loadstring(main_script)()
 end
+
+
+print("[*] Executing main script...")
+local exec_success, exec_err = pcall(function()
+    loadstring(main_script)()
+end)
+
+if not exec_success then
+    print("[✗] Failed to execute main script: " .. tostring(exec_err))
+    game:GetService("Players").LocalPlayer:Kick("Orbit: Main script execution failed")
+    return
+end
+
+print("[✓] Main script executed successfully")
 
 print("========================================")
 print("[✓] Orbit Loader | Complete")
