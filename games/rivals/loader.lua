@@ -3,7 +3,6 @@ _G.ORBIT_SESSION = _G.ORBIT_SESSION or {
     teleports = 0
 }
 
-wait(4)
 local queue_on_teleport = queue_on_teleport or queueonteleport
 
 if queue_on_teleport then
