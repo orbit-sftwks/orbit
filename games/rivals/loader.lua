@@ -12,7 +12,7 @@ if queue_on_teleport then
 
         if not _G.ORBIT_SESSION.injected then
             _G.ORBIT_SESSION.injected = true
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/orbit-sftwks/orbit/refs/heads/main/loader.lua"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/orbit-sftwks/orbit/refs/heads/main/games/rivals/main.lua"))()
         else
             if _G.ORBIT_ON_TELEPORT then
                 pcall(_G.ORBIT_ON_TELEPORT)
