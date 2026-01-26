@@ -21,7 +21,7 @@ if queue_on_teleport then
     ]])
 end
 
--- Executor support check
+
 local function executor_supported()
     local required = {
         getgc,
@@ -56,9 +56,9 @@ print("========================================")
 print("[*] Orbit Loader | Starting...")
 print("========================================")
 
--- Load ACB module
+
 print("[*] Loading ACB module...")
-local acb_url = "https://raw.githubusercontent.com/orbit-sftwks/orbit/refs/heads/main/acb.lua"
+local acb_url = "https://raw.githubusercontent.com/orbit-sftwks/orbit/refs/heads/main/libraries/acb.lua"
 local acb_success, acb = pcall(function()
     return loadstring(game:HttpGet(acb_url))()
 end)
@@ -71,19 +71,19 @@ end
 
 print("[✓] ACB module loaded")
 
--- Start ACB
+
 if not acb.start() then
     print("[✗] ACB failed to start")
     game:GetService("Players").LocalPlayer:Kick("Orbit: ACB failed to start")
     return
 end
 
--- Load main script
+
 print("[*] Loading main script...")
-local main_url = "https://raw.githubusercontent.com/orbit-sftwks/orbit/refs/heads/main/games/rivals.lua"
+local main_url = "https://raw.githubusercontent.com/orbit-sftwks/orbit/refs/heads/main/games/rivals/main.lua"
 local main_script = game:HttpGet(main_url)
 
--- Finish ACB and load main
+
 if not acb.finished(main_script) then
     print("[✗] ACB completion failed or insufficient bypasses")
     
