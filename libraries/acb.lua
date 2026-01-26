@@ -40,10 +40,10 @@ function acb.start()
     local log_service = game:GetService("LogService")
     local script_context = game:GetService("ScriptContext")
     local local_player = players.LocalPlayer
-    
+
+    task.wait(5)
 
     task.spawn(function()
-            task.wait(4)
             local success, err = pcall(function()
             for _, v in pairs(getgc(true)) do
                 if typeof(v) == "function" then
