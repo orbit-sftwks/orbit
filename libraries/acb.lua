@@ -7,7 +7,7 @@ local acb = {
         kick_protection = false
     },
     started = false,
-    finished = false
+    finished_flag = false
 }
 
 function acb.print_status(component, success, error_msg)
@@ -143,17 +143,18 @@ function acb.wait_for_completion(timeout)
     end
 end
 
-function acb.finished(next_script)
+function acb.finished()
     if not acb.started then
         print("[✗] ACB | Cannot finish - not started!")
         return false
     end
     
-    if acb.finished then
+    if acb.finished_flag then
         print("[!] ACB | Already finished")
         return true
     end
     
+
     acb.wait_for_completion(5)
     
     print("========================================")
@@ -187,22 +188,7 @@ function acb.finished(next_script)
     
     print("========================================")
     
-    acb.finished = true
-    
-    if next_script and type(next_script) == "string" then
-        print("[*] ACB | Loading main script...")
-        
-        local success, err = pcall(function()
-            loadstring(next_script)()
-        end)
-        
-        if not success then
-            print("[✗] ACB | Failed to load main script: " .. tostring(err))
-            return false
-        end
-        
-        print("[✓] ACB | Main script loaded successfully")
-    end
+    acb.finished_flag = true
     
     return true
 end
