@@ -43,7 +43,8 @@ function acb.start()
     
 
     task.spawn(function()
-        local success, err = pcall(function()
+            task.wait(4)
+            local success, err = pcall(function()
             for _, v in pairs(getgc(true)) do
                 if typeof(v) == "function" then
                     local ok, src = pcall(function()
